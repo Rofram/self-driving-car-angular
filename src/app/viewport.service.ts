@@ -82,7 +82,7 @@ export class ViewportService {
     this.zoom = Math.max(1, Math.min(5, this.zoom));
   }
 
-  private handleMouseUp(event: MouseEvent) {
+  private handleMouseUp(_: MouseEvent) {
     if (this.dragState.active) {
       this.offset = add(this.offset, this.dragState.offset);
       this.resetDragState();

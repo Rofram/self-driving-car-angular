@@ -14,7 +14,6 @@ import { WorldService } from './world.service';
 })
 export class AppComponent implements OnInit {
   @ViewChild("canvas", { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
-  canvasCtx!: CanvasRenderingContext2D;
   graph = Graph.create()
 
 
@@ -27,9 +26,9 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.canvas.nativeElement.width = 600;
     this.canvas.nativeElement.height = 600;
-    this.canvasCtx = this.canvas.nativeElement.getContext("2d")!;
     this.loadLocalGraph();
-    this.worldService.setGraph(this.graph).setCanvasCtx(this.canvasCtx);
+    const canvasCtx = this.canvas.nativeElement.getContext("2d")!;
+    this.worldService.setGraph(this.graph).setCanvasCtx(canvasCtx);
     this.viewportService.initialize(this.canvas.nativeElement);
     this.graphEditorService.initialize(this.graph);
     this.animate();

@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Graph } from './math/graph';
 import { Envelop } from './primitives/envelop';
-import { Polygon } from './primitives/polygon';
+import { Drawable } from './interfaces/drawable.interface';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WorldService {
+export class WorldService implements Drawable {
   graph!: Graph;
   roadWidth: number = 100;
   roundness: number = 3;
-  envelops: Envelop[] = [];
+  envelop: Envelop[] = [];
   canvasCtx!: CanvasRenderingContext2D;
 
   constructor() { }
@@ -20,8 +20,8 @@ export class WorldService {
     return this
   }
 
-  setCanvasCtx(ctx: CanvasRenderingContext2D) {
-    this.canvasCtx = ctx;
+  setCanvasCtx(canvasCtx: CanvasRenderingContext2D) {
+    this.canvasCtx = canvasCtx;
     return this
   }
 
@@ -36,22 +36,19 @@ export class WorldService {
   }
 
   generate() {
-    this.envelops.length = 0;
+    this.envelop.length = 0;
     for (const segment of this.graph.segments) {
-      this.envelops.push(new Envelop(segment, this.roadWidth, this.roundness));
+      this.envelop.push(new Envelop(segment, this.roadWidth, this.roundness));
     }
-
-    Polygon.multiBreak(this.envelops.map(e => e.polygon));
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    for (const envelop of this.envelops) {
+    for (const envelop of this.envelop) {
       envelop.draw(ctx);
     }
   }
 
   display() {
-    this.generate();
     this.draw(this.canvasCtx);
   }
 }
