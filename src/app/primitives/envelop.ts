@@ -1,7 +1,13 @@
-import { Drawable } from "../interfaces/drawable.interface";
+import {Drawable} from "../interfaces/drawable.interface";
 import { angle, subtract, translate } from "../math/utils";
 import { Polygon } from "./polygon";
 import { Segment } from "./segment";
+
+interface EnvelopDrawOptions {
+  fill?: string;
+  stroke?: string;
+  lineWidth?: number;
+}
 
 export class Envelop implements Drawable {
   polygon!: Polygon;
@@ -10,9 +16,8 @@ export class Envelop implements Drawable {
     this.polygon = this.generatePolygon(width, roundness);
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
-    this.polygon.draw(ctx);
-    this.polygon.drawSegments(ctx);
+  draw(ctx: CanvasRenderingContext2D, options?: EnvelopDrawOptions): void {
+    this.polygon.draw(ctx, options);
   }
 
   private generatePolygon(width: number, roundness: number): Polygon {
