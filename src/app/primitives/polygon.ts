@@ -1,6 +1,7 @@
 import { Drawable } from "../interfaces/drawable.interface";
 import { getRandomColor } from "../math/utils";
 import { Segment } from "./segment";
+import {Point} from "./point";
 
 export type PolygonDrawOptions = {
   stroke?: string;
@@ -15,8 +16,8 @@ export class Polygon implements Drawable {
   }
 
   private generateSegments() {
-    this.segments = [];
-    for (let i = 1; i < this.points.length; i++) {
+    this.segments.length = 0;
+    for (let i = 1; i <= this.points.length; i++) {
       this.segments.push(new Segment(this.points[i - 1], this.points[i % this.points.length]));
     }
   }
@@ -60,6 +61,42 @@ export class Polygon implements Drawable {
         Polygon.break(polygons[i], polygons[j]);
       }
     }
+  }
+
+  static union(polygons: Polygon[]) {
+    Polygon.multiBreak(polygons);
+    const keepSegments = [];
+
+    for (const polygon of polygons) {
+      for (const segment of polygon.segments) {
+        let keep = true;
+        for (const otherPolygon of polygons) {
+          if (polygon !== otherPolygon && otherPolygon.containsSegment(segment)) {
+            keep = false;
+            break;
+          }
+        }
+        if (keep) {
+          keepSegments.push(segment);
+        }
+      }
+    }
+    return keepSegments;
+  }
+
+  containsSegment(segment: Segment) {
+    return this.containsPoint(segment.middlePoint);
+  }
+
+  containsPoint(point: Point) {
+    const referencePoint = new Point(-1000, -1000);
+    let intersectionCount = 0;
+    for (const segment of this.segments) {
+      if (Segment.intersection(segment, new Segment(point, referencePoint))) {
+        intersectionCount++;
+      }
+    }
+    return intersectionCount % 2 === 1;
   }
 
   drawSegments(ctx: CanvasRenderingContext2D) {
