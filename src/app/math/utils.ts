@@ -18,6 +18,10 @@ function checkDistance(location: Point, point: Point): number {
   return Math.hypot(location.x - point.x, location.y - point.y);
 }
 
+export function average(point: Point, otherPoint: Point): Point {
+  return new Point((point.x + otherPoint.x) / 2, (point.y + otherPoint.y) / 2);
+}
+
 export function add(point1: Point, point2: Point): Point {
   return new Point(point1.x + point2.x, point1.y + point2.y);
 }
