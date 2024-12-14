@@ -6,11 +6,9 @@ import { ViewportService } from './viewport.service';
 import { WorldService } from './world.service';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   @ViewChild("canvas", { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
