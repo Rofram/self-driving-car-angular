@@ -1,9 +1,9 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { GraphEditorService } from './graph-editor.service';
 import { Graph } from './math/graph';
 import { ViewportService } from './viewport.service';
 import { WorldService } from './world.service';
+import {STORAGE} from "./constants/storage";
 
 @Component({
     selector: 'app-root',
@@ -40,7 +40,7 @@ export class AppComponent implements OnInit {
   }
 
   save() {
-    localStorage.setItem("graph", JSON.stringify(this.graph));
+    localStorage.setItem(STORAGE.GRAPH, JSON.stringify(this.graph));
   }
 
   dispose() {
@@ -48,7 +48,7 @@ export class AppComponent implements OnInit {
   }
 
   loadLocalGraph() {
-    const saveGraph = localStorage.getItem("graph");
+    const saveGraph = localStorage.getItem(STORAGE.GRAPH);
     if (saveGraph) {
       const graph = JSON.parse(saveGraph);
       this.graph = Graph.load(graph);
