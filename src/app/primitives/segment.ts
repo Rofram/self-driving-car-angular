@@ -1,5 +1,5 @@
 import { Drawable } from "../interfaces/drawable.interface";
-import { getIntersection } from "../math/utils";
+import {average, getIntersection} from "../math/utils";
 import { Point } from "./point";
 
 type SegmentDrawOptions = {
@@ -17,6 +17,10 @@ export class Segment implements Drawable {
 
   includes(point: Point) {
     return this.startPoint.equals(point) || this.endPoint.equals(point);
+  }
+
+  get middlePoint() {
+    return average(this.startPoint, this.endPoint);
   }
 
   static intersection(polygon: Segment, otherPolygon: Segment) {
