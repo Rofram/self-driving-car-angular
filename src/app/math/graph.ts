@@ -2,7 +2,7 @@ import { Drawable } from '../interfaces/drawable.interface';
 import { Point } from '../primitives/point';
 import { Segment } from '../primitives/segment';
 
-type GraphLocalState = {
+export type GraphLocalState = {
   points: Point[];
   segments: Segment[];
 }
@@ -22,11 +22,15 @@ export class Graph implements Drawable {
     const points = state.points.map(point => new Point(point.x, point.y));
     const segments = state.segments.map(segment =>
       new Segment(
-        points.find(p => p.equals(segment.startPoint as Point))!,
-        points.find(p => p.equals(segment.endPoint as Point))!
+        points.find(p => p.equals(segment.startPoint))!,
+        points.find(p => p.equals(segment.endPoint))!
       )
     );
     return new Graph(points, segments);
+  }
+
+  hash() {
+    return JSON.stringify(this);
   }
 
   draw(ctx: CanvasRenderingContext2D) {

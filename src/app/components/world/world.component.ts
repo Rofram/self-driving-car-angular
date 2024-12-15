@@ -36,7 +36,7 @@ export class WorldComponent implements OnInit {
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event: Event) {
+  onResize(_: Event) {
     this.canvas.nativeElement.width = window.innerWidth;
     this.canvas.nativeElement.height = window.innerHeight;
   }

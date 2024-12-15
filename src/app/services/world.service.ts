@@ -5,7 +5,8 @@ import { Drawable } from '../interfaces/drawable.interface';
 import {Polygon} from "../primitives/polygon";
 import {Segment} from "../primitives/segment";
 import {STORAGE} from "../constants/storage.constant";
-import {add} from "../math/utils";
+import {add, lerp} from "../math/utils";
+import {Point} from "../primitives/point";
 
 @Injectable({
   providedIn: 'root'
@@ -13,25 +14,27 @@ import {add} from "../math/utils";
 export class WorldService implements Drawable {
   canvasCtx!: CanvasRenderingContext2D;
   graph = Graph.create();
+  graphHash: string = this.graph.hash();
   roadWidth: number = 100;
   roadRoundness: number = 10;
   buildingWidth: number = 150;
   buildingMinLength: number = 150;
   spaceBetweenBuildings: number = 50;
+  treeSize: number = 160;
   envelops: Envelop[] = [];
   roadBoundaries: Segment[] = [];
   buildings: Polygon[] = [];
-  trees: Polygon[] = [];
+  trees: any[] = [];
 
   setGraph(graph: Graph) {
     this.graph = graph;
-    return this
+    return this;
   }
 
   initialize(canvasCtx: CanvasRenderingContext2D) {
     this.canvasCtx = canvasCtx;
     this.loadLocalGraph();
-    return this
+    return this;
   }
 
   save() {
@@ -78,6 +81,73 @@ export class WorldService implements Drawable {
     }
     this.roadBoundaries = Polygon.union(this.envelops.map(envelop => envelop.polygon));
     this.buildings = this.generateBuildings();
+    this.trees = this.generateTrees();
+  }
+
+  generateTrees() {
+    const points = [
+      ...this.roadBoundaries
+        .map(segment => [segment.startPoint, segment.endPoint])
+        .flat(),
+      ...this.buildings.map(building => building.points)
+        .flat(),
+    ]
+    const left = Math.min(...points.map(point => point.x));
+    const right = Math.max(...points.map(point => point.x));
+    const top = Math.min(...points.map(point => point.y));
+    const bottom = Math.max(...points.map(point => point.y));
+
+    const illegalPoints = [
+      ...this.buildings,
+      ...this.envelops.map(envelop => envelop.polygon),
+    ]
+
+    const trees = [];
+    let tryCount = 0;
+    while (tryCount < 100) {
+      const point = new Point(
+        lerp(left, right, Math.random()),
+        lerp(top, bottom, Math.random())
+      );
+
+      // Check if the point is too close or inside to the road or buildings
+      let keep = true;
+      for (const illegal of illegalPoints) {
+        if (illegal.containsPoint(point) || illegal.distanceToPoint(point) < this.treeSize) {
+          keep = false;
+          break;
+        }
+      }
+
+      // Check if the point is too close to other trees
+      if (keep) {
+        for (const tree of trees) {
+          if (tree.distanceTo(point) < this.treeSize) {
+            keep = false;
+            break;
+          }
+        }
+      }
+
+      // Check if the point is close to the road
+      if (keep) {
+        let closeToSomething = false;
+        for (const polygon of illegalPoints) {
+          if (polygon.distanceToPoint(point) < this.treeSize * 3) {
+            closeToSomething = true;
+            break;
+          }
+        }
+        keep = closeToSomething;
+      }
+
+      if (keep) {
+        trees.push(point);
+        tryCount = 0;
+      }
+      tryCount++;
+    }
+    return trees;
   }
 
   private generateBuildings() {
@@ -92,7 +162,6 @@ export class WorldService implements Drawable {
     }
 
     const guides = Polygon.union(tempEnvelops.map(envelop => envelop.polygon));
-
     for (let i = 0; i < guides.length; i++) {
       const guide = guides[i];
       if (guide.length < this.buildingMinLength) {
@@ -123,6 +192,7 @@ export class WorldService implements Drawable {
       buildings.push(new Envelop(support, this.buildingWidth).polygon);
     }
 
+    // Remove buildings that intersect with each other
     for (let i = 0; i < buildings.length - 1; i++) {
       for (let j = i + 1; j < buildings.length; j++) {
         if (Polygon.intersection(buildings[i], buildings[j])) {
@@ -147,10 +217,16 @@ export class WorldService implements Drawable {
     for (const building of this.buildings) {
       building.draw(ctx);
     }
+    for (const tree of this.trees) {
+      tree.draw(ctx, { size: this.treeSize, color: "rgba(0, 0, 0, 0.5)" });
+    }
   }
 
   display() {
-    this.generate();
+    if (this.graph.hash() !== this.graphHash) {
+      this.generate();
+      this.graphHash = this.graph.hash();
+    }
     this.draw(this.canvasCtx);
   }
 }

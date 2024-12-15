@@ -22,6 +22,10 @@ export function average(point: Point, otherPoint: Point): Point {
   return new Point((point.x + otherPoint.x) / 2, (point.y + otherPoint.y) / 2);
 }
 
+export function dot(point1: Point, point2: Point): number {
+  return point1.x * point2.x + point1.y * point2.y;
+}
+
 export function add(point1: Point, point2: Point): Point {
   return new Point(point1.x + point2.x, point1.y + point2.y);
 }
@@ -34,8 +38,20 @@ export function divide(point: Point, scalar: number): Point {
   return new Point(point.x / scalar, point.y / scalar);
 }
 
+export function distance(point: Point, otherPoint: Point): number {
+  return Math.hypot(point.x - otherPoint.x, point.y - otherPoint.y);
+}
+
 export function scale(point: Point, scalar: number): Point {
   return new Point(point.x * scalar, point.y * scalar);
+}
+
+export function normalize(point: Point): Point {
+  return scale(point, 1 / magnitude(point));
+}
+
+export function magnitude(point: Point): number {
+  return Math.hypot(point.x, point.y);
 }
 
 export function translate(location: Point, angle: number, offset: number): Point {
@@ -60,7 +76,9 @@ export function getIntersection(segment: Segment, otherSegment: Segment) {
   const tTop = (otherSegment.endPoint.x - otherSegment.startPoint.x) * (segment.startPoint.y - otherSegment.startPoint.y) - (otherSegment.endPoint.y - otherSegment.startPoint.y) * (segment.startPoint.x - otherSegment.startPoint.x);
   const uTop = (otherSegment.startPoint.y - segment.startPoint.y) * (segment.startPoint.x - segment.endPoint.x) - (otherSegment.startPoint.x - segment.startPoint.x) * (segment.startPoint.y - segment.endPoint.y);
   const bottom = (otherSegment.endPoint.y - otherSegment.startPoint.y) * (segment.endPoint.x - segment.startPoint.x) - (otherSegment.endPoint.x - otherSegment.startPoint.x) * (segment.endPoint.y - segment.startPoint.y);
-  if (bottom != 0) {
+
+  const epsilon = 0.001;
+  if (Math.abs(bottom) > epsilon) {
     const t = tTop / bottom;
     const u = uTop / bottom;
     if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {

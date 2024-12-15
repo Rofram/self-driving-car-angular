@@ -1,4 +1,5 @@
 import { Drawable } from "../interfaces/drawable.interface";
+import {distance, scale, subtract} from "../math/utils";
 
 type PointDrawOptions = {
   size?: number;
@@ -41,5 +42,17 @@ export class Point implements Drawable {
 
   equals(other: Point) {
     return this.x === other.x && this.y === other.y
+  }
+
+  distanceTo(other: Point) {
+    return distance(this, other);
+  }
+
+  subtract(other: Point) {
+    return subtract(this, other);
+  }
+
+  scale(factor: number) {
+    return scale(this, factor);
   }
 }

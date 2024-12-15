@@ -11,7 +11,7 @@ export type PolygonDrawOptions = {
 
 export class Polygon implements Drawable {
   segments: Segment[] = [];
-  constructor(public points: any[]) {
+  constructor(public points: Point[]) {
     this.generateSegments();
   }
 
@@ -63,6 +63,17 @@ export class Polygon implements Drawable {
     }
   }
 
+  static intersection(polygon: Polygon, otherPolygon: Polygon) {
+    for (const segment of polygon.segments) {
+      for (const otherSegment of otherPolygon.segments) {
+        if (Segment.intersection(segment, otherSegment)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   static union(polygons: Polygon[]) {
     Polygon.multiBreak(polygons);
     const keepSegments = [];
@@ -96,7 +107,28 @@ export class Polygon implements Drawable {
         intersectionCount++;
       }
     }
+    // If the number of intersections is odd, the point is inside the polygon
+    /*
+    *           Reference Point (-1000, -1000)
+    *           o
+    *            \
+    *             \
+    *              \       Edge 1       Edge 2
+    *            o--x------o------------o    (Polygon Boundary)
+    *             \  \      \            \
+    *              \  o      \            \
+    *    Inside     o---------o------------o
+    *    Point         Edge 1   Edge 3
+     */
     return intersectionCount % 2 === 1;
+  }
+
+  distanceToPoint(point: Point) {
+    return Math.min(...this.segments.map(segment => segment.distanceToPoint(point)));
+  }
+
+  distanceToPolygon(polygon: Polygon) {
+    return Math.min(...this.points.map(point => polygon.distanceToPoint(point)));
   }
 
   drawSegments(ctx: CanvasRenderingContext2D) {
