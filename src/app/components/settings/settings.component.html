@@ -1,0 +1,20 @@
+<mat-card class="settings">
+  <mat-card-content>
+    <button
+      (click)="saveWorld()"
+      mat-fab
+      matTooltip="Save world"
+      aria-label="Save world state"
+    >
+      <mat-icon>save</mat-icon>
+    </button>
+    <button
+      (click)="resetWorld()"
+      mat-fab
+      matTooltip="Reset world"
+      aria-label="Reset world state"
+    >
+      <mat-icon>restart_alt</mat-icon>
+    </button>
+  </mat-card-content>
+</mat-card>
