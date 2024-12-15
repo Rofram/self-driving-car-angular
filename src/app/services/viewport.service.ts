@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { MouseButton } from './enums/mouse-button.enum';
-import { add, scale, subtract } from './math/utils';
-import { Point } from './primitives/point';
+import { MOUSE_BUTTON } from '../constants/mouse-buttons.constant';
+import { add, scale, subtract } from '../math/utils';
+import { Point } from '../primitives/point';
+import {STORAGE} from "../constants/storage.constant";
 
 type DragState = {
   startPoint: Point;
@@ -27,14 +28,27 @@ export class ViewportService {
   };
   center!: Point;
 
-  constructor() { }
-
   initialize(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.canvasCtx = this.canvas.getContext('2d')!;
     this.center = new Point(this.canvas.width / 2, this.canvas.height / 2);
     this.offset = scale(this.center, -1);
+    this.loadLocalState();
     this.addEventListeners();
+  }
+
+  save() {
+    localStorage.setItem(STORAGE.VIEWPORT, JSON.stringify({ zoom: this.zoom, offset: this.offset, center: this.center }));
+  }
+
+  loadLocalState() {
+    const saveViewport = localStorage.getItem(STORAGE.VIEWPORT);
+    if (saveViewport) {
+      const viewportState = JSON.parse(saveViewport);
+      this.zoom = viewportState.zoom;
+      this.offset = new Point(viewportState.offset.x, viewportState.offset.y);
+      this.center = new Point(viewportState.center.x, viewportState.center.y);
+    }
   }
 
   display() {
@@ -80,17 +94,19 @@ export class ViewportService {
     const step = 0.1
     this.zoom += direction * step;
     this.zoom = Math.max(1, Math.min(5, this.zoom));
+    this.save();
   }
 
   private handleMouseUp(_: MouseEvent) {
     if (this.dragState.active) {
       this.offset = add(this.offset, this.dragState.offset);
       this.resetDragState();
+      this.save();
     }
   }
 
   private handleMouseDown(event: MouseEvent) {
-    if (event.button === MouseButton.MIDDLE) {
+    if (event.button === MOUSE_BUTTON.MIDDLE) {
       this.dragState.startPoint = this.getMousePoint(event);
       this.dragState.active = true;
     }

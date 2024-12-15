@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { MouseButton } from './enums/mouse-button.enum';
-import { Graph } from './math/graph';
-import { getNearestPoint } from './math/utils';
-import { Point } from './primitives/point';
-import { Segment } from './primitives/segment';
+import { MOUSE_BUTTON } from '../constants/mouse-buttons.constant';
+import { Graph } from '../math/graph';
+import { getNearestPoint } from '../math/utils';
+import { Point } from '../primitives/point';
+import { Segment } from '../primitives/segment';
 import { ViewportService } from './viewport.service';
 
 @Injectable({
@@ -56,14 +56,14 @@ export class GraphEditorService {
   }
 
   handleMouseDown(event: MouseEvent) {
-    if (event.button === MouseButton.RIGHT) {
+    if (event.button === MOUSE_BUTTON.RIGHT) {
       if (this.selectedPoint) {
         this.selectedPoint = null;
       } else if (this.hoveredPoint) {
         this.removePoint(this.hoveredPoint);
       }
     }
-    if (event.button === MouseButton.LEFT) {
+    if (event.button === MOUSE_BUTTON.LEFT) {
       if (this.hoveredPoint) {
         this.selectPoint(this.hoveredPoint);
         this.isDrawing = true;
@@ -71,7 +71,7 @@ export class GraphEditorService {
       }
       if (this.mousePoint) {
         this.selectPoint(this.mousePoint);
-        this.graph.addPoint(this.mousePoint);
+        this.graph.tryAddPoint(this.mousePoint);
       }
       this.hoveredPoint = this.mousePoint;
     }
